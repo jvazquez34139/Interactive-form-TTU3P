@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   //html elements to manipulate
   const form = document.getElementsByTagName('form')[0];
   const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('mail');
   const jobTitle = document.getElementById('title');
   const otherJobRole = document.getElementById('other-title');
   const theme = document.getElementById('design');
@@ -25,59 +26,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //initial actions
   nameInput.focus();
+  activityField.appendChild(cost);
   hide(otherJobRole);
   hide(creditCardInput);
   hide(paypalInfo);
   hide(bitcoinInfo);
+  hide(cost);
   submitButton.disabled = true;
 
-
-  jobTitle.addEventListener('change', () => {
+  //basic interactions
+  form.addEventListener('change', (e) => {
+    console.log(e.target);
+    //Job Titles===========================================
     if(jobTitle.value === "other"){
       show(otherJobRole);
     }else{
       hide(otherJobRole);
     }
-  });
 
-  //checks for change in theme
-  theme.addEventListener('change', () => {
-
+    //Theme and colors=====================================
     let colorOptions = colors.children;
-
     //reset color option
-    color.value = "none";
-
+    if(e.target.id == 'design'){
+      colors.value = "none";
+    }
     //checks all color options
     for(let i = 0; i < colorOptions.length; i++){
-
       //checks what theme to make visible
       if(colorOptions[i].className == theme.value){
         show(colorOptions[i]);
       }else{
         hide(colorOptions[i]);
       }
-
+      //shows all options if no theme chosen
       if(theme.value == "none"){
         show(colorOptions[i]);
       }
     }
-  });
 
-  activityField.appendChild(cost);
-  hide(cost);
-
-  //activity availability
-  activityField.addEventListener('change', () => {
+    //activities and availability==========================
     let totalCost = 0;
     let disable9Am = "";
     let disable1Pm = "";
 
     for(let i = 0; i < activities.length - 2; i++){
-
       //reset disabled checkboxes
       activities[i].disabled = false;
-
       //what activity wont be disabled
       if(activities[i].checked){
         if(activities[i].parentNode.textContent.includes("9am")){
@@ -87,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-
     //disables whatever activity wasnt checked
     //for tuesday
     for(let i = 0; i < activities.length - 2; i++){
@@ -109,19 +102,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-
     //updates cost displayed
     cost.textContent = "Total Cost: $" + totalCost;
     cost.style.color = "black";
     if(totalCost == 0){
+      //requires at least one activity
+      activityField.style.border = "2px solid red";
+      submitButton.disabled = true;
       hide(cost);
     }else{
+      activityField.style.border = "";
       show(cost);
     }
-  })
-
-  //form of payment section
-  payment.addEventListener('change', function(){
+    //Payment method=======================================
     if(payment.value == 'credit card'){
       show(creditCardInput);
       hide(paypalInfo);
@@ -143,9 +136,29 @@ document.addEventListener('DOMContentLoaded', () => {
       hide(bitcoinInfo);
       hide(creditCardInput);
     }
-  })
+  });
+  //Form validation
+  form.addEventListener('blur', (e) => {
+    console.log(e.target.id);
+    //name field cant be empty
+    if(e.target.id == 'name'){
+      if(nameInput.value == ""){
+        nameInput.style.border = '2px red solid';
+        submitButton.disabled = true;
+      }else{
+        nameInput.style.border = '2px solid #5e97b0';
+      }
+    }
+    //email format check
+    let re = /\S+@\S+\.\S+/;
+    if(e.target.id == "mail"){
+      if(re.test(emailInput.value)){
+        emailInput.style.border = '2px solid #5e97b0';
+      }else{
+        emailInput.style.border = '2px solid red';
+        submitButton.disabled = true;
+      }
+    }
 
-  if (nameInput.value == "") {
-
-  }
+  }, true);
 });
