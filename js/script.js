@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
   //html elements to manipulate
   const form = document.getElementsByTagName('form')[0];
   const nameInput = document.getElementById('name');
@@ -13,17 +12,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const cost = document.createElement('h2');
   const payment = document.getElementById('payment');
   const creditCardInput = document.getElementById('credit-card');
+  const ccNum = document.getElementById('cc-num');
+  const ccZip = document.getElementById('zip');
+  const ccCVV = document.getElementById('cvv');
+  const ccExD = document.getElementById('exp-year');
   const paypalInfo = document.getElementById('paypal-info');
   const bitcoinInfo = document.getElementById('bitcoin-info');
   const submitButton = document.getElementsByTagName('button')[0];
+  //requirements
+  let submitableName = false;
+  let submitableEmail = false;
+  let submitableCardNum = false;
+  let submitableZip = false;
+  let submitableCVV = false;
+  let chosePayMethod = false;
   //frequently used
-  const show = (color) => {
-    color.style.display = "";
+  const show = (element) => {
+    element.style.display = "";
   }
-  const hide = (color) => {
-    color.style.display = "none";
+  const hide = (element) => {
+    element.style.display = "none";
   }
-
+  const cantSubmit = (element) => {
+    element.style.border = '2px solid red';
+  }
   //initial actions
   nameInput.focus();
   activityField.appendChild(cost);
@@ -32,19 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
   hide(paypalInfo);
   hide(bitcoinInfo);
   hide(cost);
-  submitButton.disabled = true;
-
   //basic interactions
   form.addEventListener('change', (e) => {
-    console.log(e.target);
-    //Job Titles===========================================
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Job Titles
     if(jobTitle.value === "other"){
       show(otherJobRole);
     }else{
       hide(otherJobRole);
     }
-
-    //Theme and colors=====================================
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Theme and colors
     let colorOptions = colors.children;
     //reset color option
     if(e.target.id == 'design'){
@@ -63,8 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
         show(colorOptions[i]);
       }
     }
-
-    //activities and availability==========================
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //activities and availability
+    let timeString = (index, time) => {
+      return activities[index].parentNode.textContent.includes(time);
+    }
     let totalCost = 0;
     let disable9Am = "";
     let disable1Pm = "";
@@ -74,27 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
       activities[i].disabled = false;
       //what activity wont be disabled
       if(activities[i].checked){
-        if(activities[i].parentNode.textContent.includes("9am")){
+        if(timeString(i, '9am')){
           disable9Am = i;
-        }else if (activities[i].parentNode.textContent.includes('1pm')){
+        }else if (timeString(i, '1pm')){
           disable1Pm = i;
         }
       }
     }
-    //disables whatever activity wasnt checked
-    //for tuesday
+    //disables whatever activity wasnt checked for tuesday
     for(let i = 0; i < activities.length - 2; i++){
-      if(activities[i].parentNode.textContent.includes("9am") && disable9Am != ""){
+      if(timeString(i, '9am') && disable9Am != ""){
         if(i != disable9Am){
           activities[i].disabled = true;
         }
-      }else if(activities[i].parentNode.textContent.includes("1pm") && disable1Pm != ""){
+      }else if(timeString(i, '1pm') && disable1Pm != ""){
         if(i != disable1Pm){
           activities[i].disabled = true;
         }
       }
     }
-    for(var i = 0; i < activities.length; i++) {
+    //calculates total cost of activities
+    for(let i = 0; i < activities.length; i++) {
       if (activities[i].checked) {
         totalCost += 100;
         if(i == 0){
@@ -106,59 +119,117 @@ document.addEventListener('DOMContentLoaded', () => {
     cost.textContent = "Total Cost: $" + totalCost;
     cost.style.color = "black";
     if(totalCost == 0){
-      //requires at least one activity
-      activityField.style.border = "2px solid red";
-      submitButton.disabled = true;
       hide(cost);
     }else{
       activityField.style.border = "";
       show(cost);
     }
-    //Payment method=======================================
-    if(payment.value == 'credit card'){
-      show(creditCardInput);
-      hide(paypalInfo);
-      hide(bitcoinInfo);
-      submitButton.disabled = false;
-    }else if(payment.value == 'paypal'){
-      show(paypalInfo);
-      hide(creditCardInput);
-      hide(bitcoinInfo);
-      submitButton.disabled = false;
-    }else if (payment.value == 'bitcoin') {
-      show(bitcoinInfo);
-      hide(paypalInfo);
-      hide(creditCardInput);
-      submitButton.disabled = false;
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //Payment method
+    //if no activities checked, then payment is unavailable
+    let checkCost = () => {
+      if(totalCost == 0){
+        cantSubmit(activityField);
+        payment.value = "select_method";
+        return false;
+      }else{
+        chosePayMethod = true;
+        return true;
+      }
+    }
+    //when changed from default selection, if not $0 Cost
+    //then a pay method was chosen
+    if(checkCost()){
+      if(payment.value == 'credit card'){
+        show(creditCardInput);
+        hide(paypalInfo);
+        hide(bitcoinInfo);
+      }else if(payment.value == 'paypal'){
+        show(paypalInfo);
+        hide(creditCardInput);
+        hide(bitcoinInfo);
+      }else if (payment.value == 'bitcoin') {
+        show(bitcoinInfo);
+        hide(paypalInfo);
+        hide(creditCardInput);
+      }
     }else{
-      submitButton.disabled = true;
       hide(paypalInfo);
       hide(bitcoinInfo);
       hide(creditCardInput);
     }
   });
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   //Form validation
   form.addEventListener('blur', (e) => {
-    console.log(e.target.id);
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //name field cant be empty
     if(e.target.id == 'name'){
       if(nameInput.value == ""){
-        nameInput.style.border = '2px red solid';
-        submitButton.disabled = true;
+        cantSubmit(nameInput);
       }else{
-        nameInput.style.border = '2px solid #5e97b0';
+        nameInput.style.border = '2px solid #85b5ca';
+        submitableName = true;
       }
     }
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //email format check
     let re = /\S+@\S+\.\S+/;
-    if(e.target.id == "mail"){
+    if(e.target.id == 'mail'){
       if(re.test(emailInput.value)){
-        emailInput.style.border = '2px solid #5e97b0';
+        emailInput.style.border = '2px solid #85b5ca';
+        submitableEmail = true;
       }else{
-        emailInput.style.border = '2px solid red';
-        submitButton.disabled = true;
+        cantSubmit(emailInput);
       }
     }
-
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //card numbers validation
+    const checkDigitData = (id, element, length) =>{
+      if(e.target.id == id){
+        if(isNaN(element.value) === false){
+          if(element.value.length == length){
+            element.style.border = '2px solid #85b5ca';
+            return true;
+          }else{
+            cantSubmit(element);
+            return false;
+          }
+        }else{
+          cantSubmit(element);
+          return false;
+        }
+      }
+    }
+    if(payment.value == 'credit card'){
+      if(checkDigitData('cc-num', ccNum, 13) ||
+      checkDigitData('cc-num', ccNum, 14) ||
+      checkDigitData('cc-num', ccNum, 15) ||
+      checkDigitData('cc-num', ccNum, 16)){
+        submitableCardNum = true;
+      }
+      submitableZip = checkDigitData('zip', ccZip, 5);
+      submitableCVV = checkDigitData('cvv', ccCVV, 3);
+    }
+    //refactor more later before finishing
   }, true);
+  submitButton.addEventListener('click', (e) => {
+    //disable submit if all tests were not passed
+    if(submitableName &&
+    submitableEmail &&
+    chosePayMethod){
+      if(payment.value == 'credit card'){
+        if(submitableCardNum &&
+        submitableZip &&
+        submitableCVV){
+          console.log('submitted');
+        }else{
+          e.preventDefault();
+        }
+      }
+      console.log('submitted');
+    }else{
+      e.preventDefault();
+    }
+  });
 });
