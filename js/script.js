@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const otherJobRole = document.getElementById('other-title');
   const theme = document.getElementById('design');
   const colors = document.getElementById('color');
+  const colorsDisp = document.getElementById('colors-js-puns');
   const activityField = document.getElementsByClassName('activities')[0];
   const activities = document.querySelectorAll("label input");
   const cost = document.createElement('h2');
@@ -19,6 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const paypalInfo = document.getElementById('paypal-info');
   const bitcoinInfo = document.getElementById('bitcoin-info');
   const submitButton = document.getElementsByTagName('button')[0];
+  const errDiv = document.getElementById('error');
+  const errorMessage = document.createElement('p');
   //requirements
   let submitableName = false;
   let submitableEmail = false;
@@ -39,11 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
   //initial actions
   nameInput.focus();
   activityField.appendChild(cost);
+  activities[0].checked = true;
+  cost.textContent = "Total cost: $200";
+  errDiv.appendChild(errorMessage);
   hide(otherJobRole);
   hide(creditCardInput);
   hide(paypalInfo);
   hide(bitcoinInfo);
-  hide(cost);
+  hide(colorsDisp);
   //basic interactions
   form.addEventListener('change', (e) => {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -70,7 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       //shows all options if no theme chosen
       if(theme.value == "none"){
-        show(colorOptions[i]);
+        hide(colorsDisp);
+      }else{
+        show(colorsDisp);
       }
     }
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -116,14 +124,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     //updates cost displayed
-    cost.textContent = "Total Cost: $" + totalCost;
-    cost.style.color = "black";
     if(totalCost == 0){
-      hide(cost);
+      cost.textContent = "Requires one activity checked"
     }else{
+      cost.textContent = "Total Cost: $" + totalCost;
       activityField.style.border = "";
-      show(cost);
     }
+
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //Payment method
     //if no activities checked, then payment is unavailable
@@ -133,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
         payment.value = "select_method";
         return false;
       }else{
-        chosePayMethod = true;
         return true;
       }
     }
@@ -144,19 +150,23 @@ document.addEventListener('DOMContentLoaded', () => {
         show(creditCardInput);
         hide(paypalInfo);
         hide(bitcoinInfo);
+        chosePayMethod = true;
       }else if(payment.value == 'paypal'){
         show(paypalInfo);
         hide(creditCardInput);
         hide(bitcoinInfo);
+        chosePayMethod = true;
       }else if (payment.value == 'bitcoin') {
         show(bitcoinInfo);
         hide(paypalInfo);
         hide(creditCardInput);
+        chosePayMethod = true;
       }
     }else{
       hide(paypalInfo);
       hide(bitcoinInfo);
       hide(creditCardInput);
+      chosePayMethod = false;
     }
   });
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -165,10 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //name field cant be empty
     if(e.target.id == 'name'){
-      if(nameInput.value == ""){
+      if(nameInput.value == "" || nameInput.value == "Required"){
         cantSubmit(nameInput);
+        nameInput.value = "Required";
       }else{
-        nameInput.style.border = '2px solid #85b5ca';
+        nameInput.style.border = '2px solid #b585ca';
         submitableName = true;
       }
     }
@@ -177,10 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let re = /\S+@\S+\.\S+/;
     if(e.target.id == 'mail'){
       if(re.test(emailInput.value)){
-        emailInput.style.border = '2px solid #85b5ca';
+        emailInput.style.border = '2px solid #b585ca';
         submitableEmail = true;
       }else{
         cantSubmit(emailInput);
+        emailInput.value = "Required";
       }
     }
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -189,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(e.target.id == id){
         if(isNaN(element.value) === false){
           if(element.value.length == length){
-            element.style.border = '2px solid #85b5ca';
+            element.style.border = '2px solid #b585ca';
             return true;
           }else{
             cantSubmit(element);
@@ -211,25 +223,65 @@ document.addEventListener('DOMContentLoaded', () => {
       submitableZip = checkDigitData('zip', ccZip, 5);
       submitableCVV = checkDigitData('cvv', ccCVV, 3);
     }
-    //refactor more later before finishing
   }, true);
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  //submission and error notifications
   submitButton.addEventListener('click', (e) => {
-    //disable submit if all tests were not passed
-    if(submitableName &&
-    submitableEmail &&
-    chosePayMethod){
-      if(payment.value == 'credit card'){
-        if(submitableCardNum &&
-        submitableZip &&
-        submitableCVV){
-          console.log('submitted');
-        }else{
-          e.preventDefault();
+    let errText = "";
+    errorMessage.style.color = 'red';
+    //disable submit if any tests were not passed
+    //edit to show first and other invalid info
+    //checks in reverse order so the earliest error is the latest update
+
+    //credit card requirements
+    if(payment.value == 'credit card'){
+      if(submitableCVV != true){
+        if(ccCVV.value == ""){
+          errText = "A card CVV is required.";
+        }else if(isNaN(ccCVV.value)){
+          errText = "CVV must contain ONLY numbers.";
+        }else if(ccCVV.value.length != 3){
+          errText = "Card CVV provided is an invalid length."
         }
       }
-      console.log('submitted');
-    }else{
+      if(submitableZip != true){
+        if(ccZip.value == ""){
+          errText = "A ZIP is required.";
+        }else if(isNaN(ccZip.value)){
+          errText = "ZIP must contain ONLY numbers.";
+        }else if(ccZip.value.length != 5){
+          errText = "ZIP number provided is an invalid length."
+        }
+      }
+      if(submitableCardNum != true){
+        if(ccNum.value == ""){
+          errText = "A card number is required.";
+        }else if(isNaN(ccNum.value)){
+          errText = "Card number must contain ONLY numbers.";
+        }else if(ccNum.value.length < 13 || ccNum.value.length > 16){
+          errText = "Card number provided is an invalid length."
+        }
+      }
+    }
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //basic requirements
+    if(chosePayMethod != true){
+      errText = "A payment method is required."
+    }
+    if(submitableEmail != true){
+      if(emailInput.value == ""){
+        errText = "An Email is required."
+      }
+      else{
+        errText = "Email requires a valid format."
+      }
+    }
+    if(submitableName != true){
+      errText = "A name is required."
+    }
+    if(errText != ""){
       e.preventDefault();
+      errorMessage.textContent = errText;
     }
   });
 });

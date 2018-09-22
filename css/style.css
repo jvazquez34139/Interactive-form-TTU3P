@@ -1,4 +1,4 @@
-/* ================================= 
+/* =================================
   Base Element Styles
 ==================================== */
 
@@ -9,17 +9,17 @@
 body,
 input,
 button {
- font-family: 'Roboto', sans-serif;
+ font-family: 'Calibri', sans-serif;
 }
 
 body {
   font: 1em/1.5;
-  color: #184f68;
-	background: #accbd9;
+  color: #4f1868;
+	background: #cbacd9;
 }
 
 header {
-	text-align: center;  
+	text-align: center;
 }
 
 h1 {
@@ -32,13 +32,14 @@ a {
   text-decoration: none;
 }
 
-/* ================================= 
+/* =================================
   Form Element Styles
 ==================================== */
 
 form {
 	padding: .875em 1.875em 1.875em;
-	background: #85b5ca;
+	background: #b585ca;
+  border-radius: 5px;
 }
 
 fieldset,
@@ -54,13 +55,13 @@ fieldset {
 
 legend,
 button {
-	font-size: 1.25em;	
+	font-size: 1.25em;
 }
 
 legend {
 	font-weight: 500;
 	padding-top: .5em;
-	border-top: 2px solid #679cb3;
+	border-top: 2px solid #9c67b3;
 	margin-bottom: 1.125em;
 }
 
@@ -78,21 +79,22 @@ label {
 
 input,
 select {
-	margin-bottom: 1.125em;	
+	margin-bottom: 1.125em;
+  border-radius: 5px;
 }
 
 input {
 	font-size: 1em;
 	font-weight: 500;
 	padding: .8em;
-	background: #c1deeb;
-	border: 2px solid #c1deeb;
+	background: #dec1eb;
+	border: 2px solid #dec1eb;
 	outline: none;
 }
 
 input:focus {
 	background: #fff;
-	border-color: #5e97b0;
+	border-color: #975eb0;
 	transition: border-color .4s, background-color .4s;
 }
 
@@ -104,16 +106,17 @@ input[type="radio"] {
 button {
 	color: #fff;
 	padding: .55em 1.25em;
-	background: #22627e;
+	background: #62227e;
 	margin: 1.25em 0 .5em;
 	cursor: pointer;
+  border-radius: 5px;
 }
 
 button:hover {
-	background: #184c62;
+	background: #4c1862;
 }
 
-/* ================================= 
+/* =================================
   Page Styles
 ==================================== */
 
@@ -135,7 +138,7 @@ button:hover {
 	margin-top: 1.25em;
 }
 
-/* ================================= 
+/* =================================
   Helper Classes
 ==================================== */
 
@@ -149,7 +152,7 @@ button:hover {
   clear: both;
 }
 
-/* ================================= 
+/* =================================
   Media Queries
 ==================================== */
 
