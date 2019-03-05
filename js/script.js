@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitButton = document.getElementsByTagName('button')[0];
   const errDiv = document.getElementById('error');
   const errorMessage = document.createElement('p');
-  //requirements
+  //requirements for submission
   let submitableName = false;
   let submitableEmail = false;
   let submitableCardNum = false;
@@ -36,6 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const hide = (element) => {
     element.style.display = "none";
   }
+  const dispAll = (dispType, items){
+    if(dispType == "hide"){
+      items.forEach(item => {
+        show(item);
+      });
+    }else if(dispType == "show"){
+      items.forEach(item => {
+        hide(item);
+      });
+    }else{
+      console.log('dispType: "hide" or "show", items: [DOMs]');
+    }
+  }
   const cantSubmit = (element) => {
     element.style.border = '2px solid red';
   }
@@ -45,11 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
   activities[0].checked = true;
   cost.textContent = "Total cost: $200";
   errDiv.appendChild(errorMessage);
-  hide(otherJobRole);
-  hide(creditCardInput);
-  hide(paypalInfo);
-  hide(bitcoinInfo);
-  hide(colorsDisp);
+  const thingsToHide = [otherJobRole, creditCardInput, paypalInfo, bitcoinInfo, colorsDisp];
+  dispAll('hide', thingsToHide);
   //basic interactions
   form.addEventListener('change', (e) => {
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
