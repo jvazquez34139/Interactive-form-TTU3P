@@ -36,14 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const hide = (element) => {
     element.style.display = "none";
   }
-  const dispAll = (dispType, items){
+  const dispAll = (dispType, items) => {
     if(dispType == "hide"){
       items.forEach(item => {
-        show(item);
+        hide(item);
       });
     }else if(dispType == "show"){
       items.forEach(item => {
-        hide(item);
+        show(item);
       });
     }else{
       console.log('dispType: "hide" or "show", items: [DOMs]');
