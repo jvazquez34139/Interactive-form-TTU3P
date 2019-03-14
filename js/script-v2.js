@@ -22,6 +22,14 @@ const submitButton = document.getElementsByTagName('button')[0];
 const errDiv = document.getElementById('error');
 const errorMessage = document.createElement('p');
 
+//requirements for submission
+let submitableName = false;
+let submitableEmail = false;
+let submitableCardNum = false;
+let submitableZip = false;
+let submitableCVV = false;
+let chosePayMethod = false;
+
 //frequently used functions
 const show = (element) => {
   element.style.display = "";
@@ -51,6 +59,7 @@ nameInput.focus();
 activityField.appendChild(cost);
 activities[0].checked = true;
 cost.textContent = "Total cost: $200";
+errDiv.appendChild(errorMessage);
 const thingsToHide = [otherJobRole, creditCardInput, paypalInfo, bitcoinInfo, colorsDisp];
 dispAll('hide', thingsToHide);
 
@@ -149,13 +158,14 @@ const paymentInfo = (checkCost) => {
   for(method in paymentMethod){
     if(method != payment.value){
       hide(paymentMethod[method]);
+      chosePayMethod = false;
     }else{
       show(paymentMethod[method]);
+      chosePayMethod = true;
     }
   }
 }
 const checkFilled = (evt, id, test) => {
-  console.log(evt.tar
   if(evt.target.id == id){
     if(test){
       cantSubmit(evt.target);
@@ -167,7 +177,7 @@ const checkFilled = (evt, id, test) => {
     }
   }
 }
-const checkDigitData = (id, element, length) =>{
+const checkDigitData = (e, id, element, length) =>{
   if(e.target.id == id){
     if(isNaN(element.value) === false){
       if(element.value.length == length){
@@ -183,19 +193,18 @@ const checkDigitData = (id, element, length) =>{
     }
   }
 }
-const validateCard = () => {
+const validateCard = e => {
   if(payment.value == 'credit card'){
-    if(checkDigitData('cc-num', ccNum, 13) ||
-    checkDigitData('cc-num', ccNum, 14) ||
-    checkDigitData('cc-num', ccNum, 15) ||
-    checkDigitData('cc-num', ccNum, 16) ||
-    checkDigitData('zip', ccZip, 5) ||
-    checkDigitData('cvv', ccCVV, 3)){
-      return true;
+    if(checkDigitData(e, 'cc-num', ccNum, 13) ||
+    checkDigitData(e, 'cc-num', ccNum, 14) ||
+    checkDigitData(e, 'cc-num', ccNum, 15) ||
+    checkDigitData(e, 'cc-num', ccNum, 16)){
+      submitableCardNum = true;
     }
+    submitableZip = checkDigitData(e, 'zip', ccZip, 5);
+    submitableCVV = checkDigitData(e, 'cvv', ccCVV, 3);
   }
 }
-
 
 //listeners
 form.addEventListener('change', e => {
@@ -208,11 +217,72 @@ form.addEventListener('change', e => {
   }
   paymentInfo(checkCost(addCost()));
 });
-form.addEventListener('blur', (e) => {
+form.addEventListener('blur', e => {
   //name
-  checkFilled(e, 'name', nameInput.value == "");
-  checkFilled(e, 'name', nameInput.placeholder == "Required");
+  if(checkFilled(e, 'name', nameInput.value == "") ||
+  checkFilled(e, 'name', nameInput.placeholder == "Required")){
+    submitableName == true
+  }
   //email
   let re = /\S+@\S+\.\S+/;
-  checkFilled(e, 'mail', re.test(emailInput.value) == false);
+  submitableEmail = checkFilled(e, 'mail', re.test(emailInput.value) == false);
+  validateCard(e);
 },true);
+submitButton.addEventListener('click', e => {
+  let errText = "";
+  errorMessage.style.color = 'red';
+  //disable submit if any tests were not passed
+  //edit to show first and other invalid info
+  //checks in reverse order so the earliest error is the latest update
+
+  //credit card requirements
+  if(payment.value == 'credit card'){
+    if(submitableCVV != true){
+      if(ccCVV.value == ""){
+        errText = "A card CVV is required.";
+      }else if(isNaN(ccCVV.value)){
+        errText = "CVV must contain ONLY numbers.";
+      }else if(ccCVV.value.length != 3){
+        errText = "Card CVV provided is an invalid length."
+      }
+    }
+    if(submitableZip != true){
+      if(ccZip.value == ""){
+        errText = "A ZIP is required.";
+      }else if(isNaN(ccZip.value)){
+        errText = "ZIP must contain ONLY numbers.";
+      }else if(ccZip.value.length != 5){
+        errText = "ZIP number provided is an invalid length."
+      }
+    }
+    if(submitableCardNum != true){
+      if(ccNum.value == ""){
+        errText = "A card number is required.";
+      }else if(isNaN(ccNum.value)){
+        errText = "Card number must contain ONLY numbers.";
+      }else if(ccNum.value.length < 13 || ccNum.value.length > 16){
+        errText = "Card number provided is an invalid length."
+      }
+    }
+  }
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  //basic requirements
+  if(chosePayMethod != true){
+    errText = "A payment method is required."
+  }
+  if(submitableEmail != true){
+    if(emailInput.value == ""){
+      errText = "An Email is required."
+    }
+    else{
+      errText = "Email requires a valid format."
+    }
+  }
+  if(submitableName != true){
+    errText = "A name is required."
+  }
+  if(errText != ""){
+    e.preventDefault();
+    errorMessage.textContent = errText;
+  }
+});
