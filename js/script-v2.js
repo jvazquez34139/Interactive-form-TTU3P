@@ -137,12 +137,10 @@ const displayCost = (cost,element) => {
     element.textContent = "Requires one activity checked"
   }else{
     element.textContent = "Total Cost: $" + cost;
-    activityField.style.border = "";
   }
 }
 const checkCost = (cost) => {
   if(cost == 0){
-    cantSubmit(activityField);
     payment.value = "select_method";
     return false;
   }else{
