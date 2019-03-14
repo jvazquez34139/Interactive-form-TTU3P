@@ -154,6 +154,49 @@ const paymentInfo = (checkCost) => {
     }
   }
 }
+const checkFilled = (evt, id, test) => {
+  console.log(evt.tar
+  if(evt.target.id == id){
+    if(test){
+      cantSubmit(evt.target);
+      evt.target.placeholder = "Required";
+    }else{
+      evt.target.style.border = '2px solid #b585ca';
+      evt.target.placeholder = "";
+      return true;
+    }
+  }
+}
+const checkDigitData = (id, element, length) =>{
+  if(e.target.id == id){
+    if(isNaN(element.value) === false){
+      if(element.value.length == length){
+        element.style.border = '2px solid #b585ca';
+        return true;
+      }else{
+        cantSubmit(element);
+        return false;
+      }
+    }else{
+      cantSubmit(element);
+      return false;
+    }
+  }
+}
+const validateCard = () => {
+  if(payment.value == 'credit card'){
+    if(checkDigitData('cc-num', ccNum, 13) ||
+    checkDigitData('cc-num', ccNum, 14) ||
+    checkDigitData('cc-num', ccNum, 15) ||
+    checkDigitData('cc-num', ccNum, 16) ||
+    checkDigitData('zip', ccZip, 5) ||
+    checkDigitData('cvv', ccCVV, 3)){
+      return true;
+    }
+  }
+}
+
+
 //listeners
 form.addEventListener('change', e => {
   displayOtherJobs();
@@ -165,3 +208,11 @@ form.addEventListener('change', e => {
   }
   paymentInfo(checkCost(addCost()));
 });
+form.addEventListener('blur', (e) => {
+  //name
+  checkFilled(e, 'name', nameInput.value == "");
+  checkFilled(e, 'name', nameInput.placeholder == "Required");
+  //email
+  let re = /\S+@\S+\.\S+/;
+  checkFilled(e, 'mail', re.test(emailInput.value) == false);
+},true);
